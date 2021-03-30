@@ -9,7 +9,6 @@ services:
       - ./transfer.sh:/BatchTransfer/transfer.sh
       - ./BatchTransfer:/BatchTransfer
     working_dir: /BatchTransfer
-    command: ["sleep", "999999"]
+    # command: ["/BatchTransfer/transfer.sh"]
+    command: ["sleep", "99999999"]
     restart: always
-
-

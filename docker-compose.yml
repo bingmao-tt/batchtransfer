@@ -6,9 +6,10 @@ services:
     image: thundercoretw/batchtransfer:b5c7d4c
     hostname: batchtransfer
     volumes:
-      #- ./transfer.sh:/transfer.sh
+      - ./transfer.sh:/BatchTransfer/transfer.sh
       - ./BatchTransfer:/BatchTransfer
     working_dir: /BatchTransfer
     command: ["sleep", "999999"]
     restart: always
+
 

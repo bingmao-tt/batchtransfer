@@ -1,3 +1,4 @@
 BatchTransfer/.private.key
 BatchTransfer/to.csv
 BatchTransfer/tx*.log
+BatchTransfer/transfer.sh

@@ -1,5 +1,6 @@
 #!/bin/bash
 DIR_PATH=$(dirname "$(readlink -f "${0}")")
+TO_FILE="${DIR_PATH}/BatchTransfer/to.csv"
 
 # Check private key file
 if [ ! -f "${DIR_PATH}/BatchTransfer/.private.key" ]; then
@@ -9,10 +10,30 @@ fi
 
 # Check to.csv
 echo -e "\n### to.csv ###"
-if ! cat "${DIR_PATH}/BatchTransfer/to.csv" 2>/dev/null; then
+if ! cat "${TO_FILE}" 2>/dev/null; then
     echo "to.csv don't exist."
     exit 1
 fi
+
+address_list=$(< "${TO_FILE}" cut -d "," -f 1 | sort)
+unset repeat
+
+echo -e "\n"
+for address in ${address_list}; do
+    if [ "${address}" == "${preAddress}" ]; then
+        echo "Repeat address: ${address}"
+        repeat="True"
+    fi
+    preAddress="${address}"
+done
+
+if [ "${repeat}" == "True" ]; then
+    echo "Exist!"
+    exit 1
+fi
+
+echo -e "\n"
+echo -e "Total $(wc "${TO_FILE}" | awk '{print $1}') address."
 echo -e "\n"
 
 read -r -s -p "Does to.csv current?: " current ; echo ""

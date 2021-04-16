@@ -2,6 +2,15 @@
 DIR_PATH=$(dirname "$(readlink -f "${0}")")
 TO_FILE="${DIR_PATH}/BatchTransfer/to.csv"
 
+if [ -f "${DIR_PATH}/.env" ]; then
+    # shellcheck source=.env
+    # shellcheck disable=SC1091
+    source "${DIR_PATH}/.env"
+else
+    echo "${DIR_PATH}/.env not exist. exit"
+    exit 1
+fi
+
 # Check private key file
 if [ ! -f "${DIR_PATH}/BatchTransfer/.private.key" ]; then
     echo ".private.key don't exist."
@@ -15,16 +24,28 @@ if ! cat "${TO_FILE}" 2>/dev/null; then
     exit 1
 fi
 
+echo -e "\n"
+
+JSONRPC=("{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${BOT_ADDRESS}\",\"latest\"],\"id\":1}")
+BALANCE=$(curl -s -H "Content-Type: application/json" -X POST --data ${JSONRPC} ${RPC_URL} | sed "s/\"/ /g" | awk -F ' ' '{print $10}' | sed "s/0x//g" )
+BALANCE=$(echo "ibase=16;obase=A;$(echo "${BALANCE}" | tr '[a-z]' '[A-Z]')" | bc)
+BALANCE=${BALANCE:0:-18}
+
 address_list=$(< "${TO_FILE}" cut -d "," -f 1 | sort)
+amount_lis=$(< "${TO_FILE}" cut -d "," -f 2 | sort)
+total_amount=0
 unset repeat
 
-echo -e "\n"
 for address in ${address_list}; do
-    if [ "${address}" == "${preAddress}" ]; then
+    if [ "${address}" == "${pre_address}" ]; then
         echo "Repeat address: ${address}"
         repeat="True"
     fi
-    preAddress="${address}"
+    pre_address="${address}"
+done
+
+for amount in ${amount_lis}; do
+    total_amount=$(("${total_amount}" + "${amount}"))
 done
 
 if [ "${repeat}" == "True" ]; then
@@ -33,14 +54,16 @@ if [ "${repeat}" == "True" ]; then
 fi
 
 echo -e "\n"
-echo -e "Total $(wc "${TO_FILE}" | awk '{print $1}') address."
+echo "Total pay: ${total_amount}"
+echo "Bot balance: ${BALANCE}"
+echo -e "Total $(wc "${TO_FILE}" | awk '{print $2}') address."
 echo -e "\n"
 
 read -r -s -p "Does to.csv current?: " current ; echo ""
 if [ "${current}" == "yes" ]; then
     echo "Start transfer"
     # Start execute batchtransfer
-    docker run --rm -ti --name transfer --workdir="/BatchTransfer" -v "${DIR_PATH}/BatchTransfer:/BatchTransfer" -v "${DIR_PATH}/transfer.sh:/BatchTransfer/transfer.sh" thundercoretw/batchtransfer:b5c7d4c /BatchTransfer/transfer.sh
+    docker run --rm -ti --name transfer --workdir="/BatchTransfer" -v "${DIR_PATH}/.env:/BatchTransfer/.env" -v "${DIR_PATH}/BatchTransfer:/BatchTransfer" -v "${DIR_PATH}/transfer.sh:/BatchTransfer/transfer.sh" thundercoretw/batchtransfer:b5c7d4c /BatchTransfer/transfer.sh
 
     echo -e "\nTransfer done."
 else

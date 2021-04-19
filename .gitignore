@@ -1,4 +1,4 @@
-.env
+BatchTransfer/.env
 BatchTransfer/.private.key
 BatchTransfer/to.csv
 BatchTransfer/tx*.log

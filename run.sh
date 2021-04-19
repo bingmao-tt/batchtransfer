@@ -34,7 +34,12 @@ echo -e "\n"
 JSONRPC=("{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${BOT_ADDRESS}\",\"latest\"],\"id\":1}")
 BALANCE=$(curl -s -H "Content-Type: application/json" -X POST --data ${JSONRPC} ${RPC_URL} | sed "s/\"/ /g" | awk -F ' ' '{print $10}' | sed "s/0x//g" )
 BALANCE=$(echo "ibase=16;obase=A;$(echo "${BALANCE}" | tr '[a-z]' '[A-Z]')" | bc)
-BALANCE=${BALANCE:0:-18}
+if [ "${#BALANCE}" -lt 18 ]; then
+    echo "Bot balance less than 18, exit."
+    exit 1
+else
+    BALANCE=${BALANCE:0:-18}
+fi
 
 address_list=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 1 | sort)
 amount_lis=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 2 | sort)

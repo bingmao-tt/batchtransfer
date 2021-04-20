@@ -3,9 +3,12 @@ DIR_PATH=$(dirname "$(readlink -f "${0}")")
 TO_FILE="${DIR_PATH}/BatchTransfer/to.csv"
 
 if [ -f "${DIR_PATH}/BatchTransfer/.env" ]; then
+    cp "${DIR_PATH}/BatchTransfer/.env" "${DIR_PATH}/BatchTransfer/.env.tmp"
+    sed -i -e "s/\\r//g" "${DIR_PATH}/BatchTransfer/.env.tmp"
     # shellcheck source=.env
     # shellcheck disable=SC1091
-    source "${DIR_PATH}/BatchTransfer/.env"
+    source "${DIR_PATH}/BatchTransfer/.env.tmp"
+    rm "${DIR_PATH}/BatchTransfer/.env.tmp"
 else
     echo "${DIR_PATH}/BatchTransfer/.env not exist."
     echo "You should put .env to BatchTransfer/.env"
@@ -29,13 +32,18 @@ if ! cat "${TO_FILE}" 2>/dev/null; then
     exit 1
 fi
 
+if ! BOT_ADDRESS=$(python3 "${DIR_PATH}/address.py"); then
+    echo -e "\nCovert private key to address failed"
+    exit 1
+fi
+
 echo -e "\n"
 
 JSONRPC=("{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${BOT_ADDRESS}\",\"latest\"],\"id\":1}")
 BALANCE=$(curl -s -H "Content-Type: application/json" -X POST --data ${JSONRPC} ${RPC_URL} | sed "s/\"/ /g" | awk -F ' ' '{print $10}' | sed "s/0x//g" )
 BALANCE=$(echo "ibase=16;obase=A;$(echo "${BALANCE}" | tr '[a-z]' '[A-Z]')" | bc)
 if [ "${#BALANCE}" -lt 18 ]; then
-    echo "Bot balance less than 18, exit."
+    echo "Bot balance less than 1, exit."
     exit 1
 else
     BALANCE=${BALANCE:0:-18}
@@ -63,7 +71,8 @@ if [ "${repeat}" == "True" ]; then
     exit 1
 fi
 
-echo "Bot balance: ${BALANCE}"
+echo "RPC: ${RPC_URL}"
+echo "Bot address: ${BOT_ADDRESS}, Bot balance: ${BALANCE}"
 # echo "Total pay: ${total_amount}"
 echo -e "Total address: $(wc "${TO_FILE}" | awk '{print $2}'), Pay amount: ${total_amount}"
 if [ "${total_amount}" -gt "${BALANCE}" ]; then

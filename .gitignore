@@ -1,12 +1,1 @@
-BatchTransfer/.env
-BatchTransfer/.private_list.csv
-BatchTransfer/.private.key
-BatchTransfer/pay_list.csv
-BatchTransfer/to.csv
-BatchTransfer/tx*.log
-BatchTransfer/transfer.sh
-BatchTransfer/tokenAirdrop/.private.key
-BatchTransfer/tokenAirdrop/to.json
-BatchTransfer/tokenAirdrop/to.csv
-BatchTransfer/tokenAirdrop/tx*.log
-BatchTransfer/tokenAirdrop/tokenAddress.txt
+BatchTransfer/*

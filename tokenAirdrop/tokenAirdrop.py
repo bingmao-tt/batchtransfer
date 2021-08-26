@@ -198,8 +198,8 @@ print("Contract {0} balance: {1}".format(
 
 print("")
 if tokenBalance < totalSendAmount:
-    print("Token Balance not enough, please send {0} {1} to {2}".format(
-        totalSendAmount - tokenBalance, tokenSymbol, tokenAddress))
+    print("Token Balance not enough, please send {0} {1} to airdrop contract({2})".format(
+        totalSendAmount - tokenBalance, tokenSymbol, airdropContractAddress))
     sys.exit()
 print("Start send transaction.")
 

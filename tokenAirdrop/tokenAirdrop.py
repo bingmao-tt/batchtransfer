@@ -84,7 +84,7 @@ w3 = Web3(Web3.HTTPProvider(RPC_URL,
 
 f = open("{0}/../BatchTransfer/tokenAirdrop/.private.key".format(
     os.path.dirname(os.path.realpath(__file__))), "r")
-privateKey = f.readline()
+privateKey = f.readline().strip('\n').strip('\t')
 f.close
 f = open("{0}/../BatchTransfer/tokenAirdrop/tokenAddress.txt".format(
     os.path.dirname(os.path.realpath(__file__))), "r")
@@ -94,6 +94,7 @@ f.close
 fromAddress = Web3.toChecksumAddress(calculate_address(privateKey))
 print("Address: {}".format(fromAddress))
 airdropContractAddress = "0xc46c4D799828f6748491cdf4D10f52E991D4E3dc"
+
 # nonce = w3.eth.getTransactionCount(fromAddress)
 
 f = open("{0}/Airdrop.abi".format(os.path.dirname(os.path.realpath(__file__))), "r")
@@ -196,6 +197,11 @@ print("Contract {0} balance: {1}".format(
 # tokenBalance = airdrop.functions.getTokenBalance(tokenAddress).call()
 # print("Avaliable token balance: {0}".format(tokenBalance))
 
+
+# for addressInfo in toInfo:
+#     print("###### send {0} to {1}".format(
+#         int(int(float(addressInfo['amount']) * 10 ** tokenDecimal)/100000)*100000, addressInfo['userAddress']))
+
 print("")
 if tokenBalance < totalSendAmount:
     print("Token Balance not enough, please send {0} {1} to airdrop contract({2})".format(
@@ -214,7 +220,7 @@ for addressInfo in toInfo:
     toAmount = addressInfo['amount']
     toLog.append("{},{}".format(toAddress, toAmount))
     toArgs = {
-        'toAddress': toAddress,
+        'toAddress': Web3.toChecksumAddress(toAddress),
         'values': int(int(float(toAmount) * 10 ** tokenDecimal)/100000)*100000
     }
     toList.append(toArgs)

@@ -9,7 +9,9 @@ else
     exit 1
 fi
 
+BATCH_SIZE=${BATCH_SIZE:-50}
+
 # batch-transfer .private.key to.csv https://mainnet-rpc.thundercore.com
 # batch-transfer .private.key to.csv https://testnet-rpc.thundercore.com
 
-batch-transfer .private.key to.csv "${RPC_URL}"
+batch-transfer -batch-size "${BATCH_SIZE}" .private.key to.csv "${RPC_URL}"

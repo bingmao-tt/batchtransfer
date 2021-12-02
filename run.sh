@@ -190,12 +190,7 @@ exec_pay(){
     JSONRPC=("{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${BOT_ADDRESS}\",\"latest\"],\"id\":1}")
     BALANCE=$(curl -s -H "Content-Type: application/json" -X POST --data ${JSONRPC} ${RPC_URL} | sed "s/\"/ /g" | awk -F ' ' '{print $10}' | sed "s/0x//g" )
     BALANCE=$(echo "ibase=16;obase=A;$(echo "${BALANCE}" | tr '[a-z]' '[A-Z]')" | bc)
-    if [ "${#BALANCE}" -lt 18 ]; then
-        echo -e "\033[31mBot(${BOT_ADDRESS}) balance less than 1, exit.\033[0m"
-        exit_clear 1
-    else
-        BALANCE=${BALANCE:0:-18}
-    fi
+    BALANCE=$(bash -c "python3 -c 'print(${BALANCE} / 10 ** 18)'")
 
     address_list=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 1 | sort)
     amount_lis=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 2 | sort)
@@ -222,7 +217,7 @@ exec_pay(){
     done
 
     for amount in ${amount_lis}; do
-        total_amount=$(("${total_amount}" + "${amount}"))
+        total_amount=$(bash -c "python -c 'print(${total_amount} + ${amount})'")
     done
 
     if [ "${repeat}" == "True" ]; then
@@ -237,8 +232,8 @@ exec_pay(){
     # echo "Total pay: ${total_amount}"
     echo -e "Total pay address number: \033[33m$(wc "${TO_FILE}" | awk '{print $2}')\033[0m"
     echo -e "Total pay amount: \033[33m${total_amount}\033[0m\n"
-    if [ "${total_amount}" -gt "${BALANCE}" ]; then
-        echo "\033[31mBot balance less than pay, please refill.\033[0m"
+    if [ "$(echo "${total_amount} > ${BALANCE}" | bc)" == "1" ]; then
+        echo -e "\033[31mBot balance less than pay, please refill $(bash -c "python -c 'print(${total_amount} - ${BALANCE})'") to address: ${BOT_ADDRESS}.\033[0m"
         exit_clear 1
     fi
 

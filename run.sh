@@ -193,7 +193,7 @@ exec_pay(){
     BALANCE=$(bash -c "python3 -c 'print(${BALANCE} / 10 ** 18)'")
 
     address_list=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 1 | sort)
-    amount_lis=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 2 | sort)
+    amount_list=$(< "${TO_FILE}" tr -d '\r' | cut -d "," -f 2)
     total_amount=0
     unset repeat
 
@@ -216,8 +216,8 @@ exec_pay(){
         fi
     done
 
-    for amount in ${amount_lis}; do
-        total_amount=$(bash -c "python -c 'print(${total_amount} + ${amount})'")
+    for amount in ${amount_list}; do
+        total_amount=$(bash -c "python3 -c 'print(${total_amount} + ${amount})'")
     done
 
     if [ "${repeat}" == "True" ]; then
@@ -233,7 +233,7 @@ exec_pay(){
     echo -e "Total pay address number: \033[33m$(wc "${TO_FILE}" | awk '{print $2}')\033[0m"
     echo -e "Total pay amount: \033[33m${total_amount}\033[0m\n"
     if [ "$(echo "${total_amount} > ${BALANCE}" | bc)" == "1" ]; then
-        echo -e "\033[31mBot balance less than pay, please refill $(bash -c "python -c 'print(${total_amount} - ${BALANCE})'") to address: ${BOT_ADDRESS}.\033[0m"
+        echo -e "\033[31mBot balance less than pay, please refill $(bash -c "python3 -c 'print(${total_amount} - ${BALANCE})'") to address: ${BOT_ADDRESS}.\033[0m"
         exit_clear 1
     fi
 

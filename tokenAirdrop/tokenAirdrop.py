@@ -27,12 +27,16 @@ def sendtx(fromAddress, tokenAddress, toList):
         'from': fromAddress,
         'data': abidata
     })
+    # TT
+    chainId = 108
+
     # print("E {}".format(estimateGas))
     transaction = {'to': airdropContractAddress,
                    'from': fromAddress,
                    'gas': math.ceil(estimateGas * 1.2),
                    'gasPrice': w3.toWei('1', 'gwei'),
                    'data': abidata,
+                   'chainId': chainId,
                    'nonce': nonce}
     # print(transaction)
     signed_txn = w3.eth.account.signTransaction(transaction, privateKey)
@@ -42,8 +46,17 @@ def sendtx(fromAddress, tokenAddress, toList):
             print("Send raw TX")
             txHash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
             print("Tx: {}".format(txHash.hex()))
-        except:
-            continue
+        except Exception as e:
+            error_class = e.__class__.__name__  # 取得錯誤類型
+            detail = e.args[0]  # 取得詳細內容
+            cl, exc, tb = sys.exc_info()  # 取得Call Stack
+            lastCallStack = traceback.extract_tb(tb)[-1]  # 取得Call Stack的最後一筆資料
+            fileName = lastCallStack[0]  # 取得發生的檔案名稱
+            lineNum = lastCallStack[1]  # 取得發生的行號
+            funcName = lastCallStack[2]  # 取得發生的函數名稱
+            errMsg = "File \"{}\", line {}, in {}: [{}] {}".format(
+                fileName, lineNum, funcName, error_class, detail)
+            print(errMsg)
         break
     while True:
         try:
@@ -78,6 +91,7 @@ def calculate_address(privateKey):
 
 
 RPC_URL = "https://mainnet-rpc.thundercore.com"
+# RPC_URL = "https://bsc-dataseed.binance.org"
 print("PRC URL: {}".format(RPC_URL))
 w3 = Web3(Web3.HTTPProvider(RPC_URL,
                             request_kwargs={'timeout': 10}))
@@ -93,7 +107,10 @@ f.close
 
 fromAddress = Web3.toChecksumAddress(calculate_address(privateKey))
 print("Address: {}".format(fromAddress))
+# TT
 airdropContractAddress = "0xc46c4D799828f6748491cdf4D10f52E991D4E3dc"
+# BSC
+# airdropContractAddress = "0xB8B1520b2c981841846b6457Ab49Bc4ad61D2C5F"
 
 # nonce = w3.eth.getTransactionCount(fromAddress)
 

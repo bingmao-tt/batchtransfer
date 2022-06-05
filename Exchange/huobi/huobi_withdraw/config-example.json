@@ -1,0 +1,12 @@
+{
+    "withdraw": false,
+    "access_key": "",
+    "secret_key": "",
+    "account_id": "",
+    "withdraw_blank_time": true,
+    "withdraw_blank_time_zero_fee": true,
+    "withdraw_blank_min_time": 10,
+    "withdraw_blank_max_time": 300,
+    "ignore_zero_amount": false,
+    "check_withdraw_reuqest_interval": 5
+}

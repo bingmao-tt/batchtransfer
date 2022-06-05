@@ -57,6 +57,7 @@ def sendtx(fromAddress, tokenAddress, toList):
             errMsg = "File \"{}\", line {}, in {}: [{}] {}".format(
                 fileName, lineNum, funcName, error_class, detail)
             print(errMsg)
+            sys.exit()
         break
     while True:
         try:

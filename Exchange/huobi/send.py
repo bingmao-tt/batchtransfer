@@ -178,6 +178,8 @@ logging.info(
 for withdraw in withdraw_info.withdraw_list:
     for currency in currency_list:
         if withdraw.currency == currency:
+            if withdraw.displayName == "TRC20":
+                continue
             if not send_withdraw.check_withdraw_format(type="eth", address=withdraw.address):
                 logging.error("Address format error: id={}, address={}".format(
                     withdraw.id, withdraw.address))

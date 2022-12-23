@@ -1,0 +1,4 @@
+Chain,TokenSymbol,URL,AirdropContract,TokenAddress,Key,Owner
+Mainnet,FTT,https://mainnet-rpc.thundercore.com,0xc46c4D799828f6748491cdf4D10f52E991D4E3dc,0xD441cD6eCfA027721B4d9ea5D9a6A9649ad8b3dA,,
+Testnet,FTT,https://testnet-rpc.thundercore.com,0xa8899d75109965a5f1659ad1d6c85412d7d3b11c,0x96c8d5151ca3efa6c1855aebb06c0ea77c57dc18,cd6e7b15f0818c78822904ad50b408206b9d4f81280207df08c5a432e9524b09,0x42094FBF8D243B677C4969AA250e0A6b
+Bsc,TT,https://bsc-dataseed.binance.org,0xB8B1520b2c981841846b6457Ab49Bc4ad61D2C5F,0x990E7154bB999FAa9b2fa5Ed29E822703311eA85,,

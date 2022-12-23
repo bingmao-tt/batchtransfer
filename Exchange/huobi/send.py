@@ -91,6 +91,7 @@ for asset in account.assets:
     wi.set_quota(wq)
     # wi.show_quota()
     account.withdrawInfo.append(wi)
+    time.sleep(0.1)
 
 # # Test: get withdraw info
 # tt_balance, _ = account.get_balance("tt")

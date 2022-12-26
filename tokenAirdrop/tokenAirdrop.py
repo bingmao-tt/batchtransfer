@@ -12,6 +12,7 @@ import traceback
 from Crypto.Hash import keccak
 from web3 import Web3
 from decimal import Decimal
+from datetime import datetime, timezone, timedelta
 
 
 def parseArgs(action="get"):
@@ -113,6 +114,9 @@ def calculate_address(privateKey):
 
 
 def main():
+    now = datetime.now().astimezone(timezone(timedelta(hours=8)))
+    start_time = now.strftime("%Y%m%d_%H%M%S")
+
     args = parseArgs()
 
     # print("{0}/../BatchTransfer/tokenAirdrop/.private_list.csv".format(
@@ -181,7 +185,7 @@ def main():
         csvArgs['TokenAddress']).call()
     print("Token decimal: {0}".format(tokenDecimal))
 
-    txSize = 3
+    txSize = int(csvArgs['Count'])
     count = 0
     sentCount = 0
     toList = []
@@ -197,12 +201,33 @@ def main():
         toFile.close
 
         toInfo = []
+        count = 0
 
         for line in lines:
-            item = {}
-            item["userAddress"] = line.strip('\n').strip('\t').split(',')[0]
-            item["amount"] = int(line.strip('\n').strip('\t').split(',')[1])
-            toInfo.append(item)
+            if count == 0:
+                if line.strip('\n').strip('\t').split(',')[0] != "Address":
+                    print("The (0,0) of {} should be \"Address\"".format(args.file))
+                    sys.exit()
+                if line.strip('\n').strip('\t').split(',')[1] != "Amount":
+                    print("The (0,1) of {} should be \"Amount\"".format(args.file))
+                    sys.exit()
+            else:
+                # print("### {}".format(len(line.strip('\n').strip('\t').split(','))))
+                item = {}
+                item['userAddress'] = line.strip(
+                    '\n').strip('\t').split(',')[0]
+                item['amount'] = int(line.strip(
+                    '\n').strip('\t').split(',')[1])
+                if len(line.strip('\n').strip('\t').split(',')) < 3:
+                    item['name'] = ""
+                else:
+                    item['name'] = line.strip('\n').strip('\t').split(',')[2]
+                if len(line.strip('\n').strip('\t').split(',')) < 4:
+                    item['note'] = ""
+                else:
+                    item['note'] = line.strip('\n').strip('\t').split(',')[3]
+                toInfo.append(item)
+            count += 1
     elif args.file.split('.')[-1] == "json":
         ##########################
         ### For to.json        ###
@@ -210,15 +235,22 @@ def main():
         toFile = open("{0}/../BatchTransfer/tokenAirdrop/to.json".format(
             os.path.dirname(os.path.realpath(__file__))))
         toInfo = json.loads(toFile.read())
+        for info in toInfo:
+            if len(info) < 3:
+                info['name'] = ""
+            if len(info) < 4:
+                info['note'] = ""
     else:
         print("File type not support. Only support csv and json.")
         sys.exit()
 
+    for item in toInfo:
+        print("address: {}, amount: {}, note: {}, name: {}".format(
+            item['userAddress'], item['amount'], item['name'], item['note']))
+
     ##########################
     ### Start transfer     ###
     ##########################
-    fo = open("{0}/../BatchTransfer/tokenAirdrop/txs.log".format(
-        os.path.dirname(os.path.realpath(__file__))), "a+")
     totalAddrNum = 0
     totalSendAmount = 0
     print("")
@@ -249,10 +281,16 @@ def main():
         print("Exit.")
         sys.exit()
 
+    fo = open("{path}/../BatchTransfer/tokenAirdrop/txs-{time}.log".format(
+        path=os.path.dirname(os.path.realpath(__file__)), time=start_time), "a+")
+    fo.write("Address,Amount,Name,Note,Hash\n")
+    count = 0
     for addressInfo in toInfo:
         toAddress = addressInfo['userAddress']
         toAmount = addressInfo['amount']
-        toLog.append("{},{}".format(toAddress, toAmount))
+        toName = addressInfo['name']
+        toNote = addressInfo['note']
+        toLog.append("{},{},{},{}".format(toAddress, toAmount, toName, toNote))
         toArgs = {
             'toAddress': Web3.toChecksumAddress(toAddress),
             'values': int(int(float(toAmount) * 10 ** tokenDecimal)/100000)*100000
